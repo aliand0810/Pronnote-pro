@@ -11,17 +11,74 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
-    /* ── PWA Manifest inline ── */
-    (function(){
-      const m={name:"ProNote Pro",short_name:"ProNote",start_url:"./",display:"standalone",background_color:"#1e1b4b",theme_color:"#4f46e5",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%234f46e5'/><text x='50%' y='55%' font-size='100' dominant-baseline='middle' text-anchor='middle'>📝</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
-      const b=new Blob([JSON.stringify(m)],{type:'application/json'});
-      const l=document.createElement('link');
-      l.rel='manifest'; l.href=URL.createObjectURL(b);
-      document.head.appendChild(l);
+    /* ══════════════════════════════════════════
+       PWA — Manifest + Service Worker inline
+       (inspiré COVO Pro — pas de fichiers externes)
+    ══════════════════════════════════════════ */
+
+    /* 1. Manifest */
+    (function () {
+      const icons = [{
+        src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC7klEQVR4nO3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMAAAAAAAHgB5QAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMDFUMDA6MDA6MDArMDA6MDDdz3EYAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTAxVDAwOjAwOjAwKzAwOjAwrILJpAAAAABJRU5ErkJggg==",
+        sizes: "192x192", type: "image/png"
+      }];
+      const manifest = {
+        name: "ProNote Pro",
+        short_name: "ProNote",
+        description: "Gestion de projets et notes",
+        start_url: location.href,
+        scope: "./",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#1e1b4b",
+        theme_color: "#4f46e5",
+        icons
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = URL.createObjectURL(blob);
+      document.head.appendChild(link);
     })();
-    /* ── PWA Install prompt ── */
-    var deferredPrompt=null;
-    window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('btn-install')&&(document.getElementById('btn-install').style.display='flex');});
+
+    /* 2. Service Worker inline (requis pour install prompt) */
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      const SW_CODE = `
+        const CACHE = 'pronote-pro-v1';
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open(CACHE).then(c => c.addAll([location.href])).catch(()=>{}));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e => {
+          e.waitUntil(clients.claim());
+        });
+        self.addEventListener('fetch', e => {
+          e.respondWith(
+            caches.match(e.request).then(r => r || fetch(e.request).catch(() => new Response('', {status: 408})))
+          );
+        });
+      `;
+      const blob = new Blob([SW_CODE], { type: "application/javascript" });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl, { scope: "./" })
+        .then(() => console.log("✅ SW ProNote Pro enregistré"))
+        .catch(e => console.warn("SW:", e));
+    })();
+
+    /* 3. Install prompt handler */
+    var deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      var btn = document.getElementById('btn-install');
+      if (btn) btn.style.display = 'flex';
+    });
+    window.addEventListener('appinstalled', function () {
+      deferredPrompt = null;
+      var btn = document.getElementById('btn-install');
+      if (btn) btn.style.display = 'none';
+    });
   </script>
   <style>
     :root {
@@ -1882,7 +1939,7 @@
         if (c) { c.text = result; State.save(); App.renderComments(); }
       }
       UI.closeModals();
-    }, { capture: true }); // capture pour passer avant les autres listeners 
+    }, { capture: true }); // capture pour passer avant les autres listeners
 
     /* Shake animation */
     const style = document.createElement('style');
