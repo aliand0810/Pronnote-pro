@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" id="meta-theme-color" content="#1e1b4b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProNote Pro">
+  <title>ProNote Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    /* ── PWA Manifest inline ── */
+    (function(){
+      const m={name:"ProNote Pro",short_name:"ProNote",start_url:"./",display:"standalone",background_color:"#1e1b4b",theme_color:"#4f46e5",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%234f46e5'/><text x='50%' y='55%' font-size='100' dominant-baseline='middle' text-anchor='middle'>📝</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
+      const b=new Blob([JSON.stringify(m)],{type:'application/json'});
+      const l=document.createElement('link');
+      l.rel='manifest'; l.href=URL.createObjectURL(b);
+      document.head.appendChild(l);
+    })();
+    /* ── PWA Install prompt ── */
+    var deferredPrompt=null;
+    window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('btn-install')&&(document.getElementById('btn-install').style.display='flex');});
+  </script>
+  <style>
+    :root {
+      --bg: #f0f2f8;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --border: #e2e4f0;
+      --primary: #4f46e5;
+      --primary-light: #ede9fe;
+      --primary-dark: #3730a3;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --info: #06b6d4;
+      --gold: #d97706;
+      --header-h: 58px;
+      --nav-h: 64px;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(79,70,229,0.08);
+      --shadow-md: 0 4px 24px rgba(79,70,229,0.13);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+
+    /* ─── LOGIN ─────────────────────────────────────────────── */
+    #view-login {
+      position: fixed; inset: 0;
+      background: linear-gradient(145deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 100; padding: 30px 20px;
+    }
+    .login-logo {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .login-title {
+      color: #fff; font-size: 26px; font-weight: 800;
+      margin: 0 0 4px; letter-spacing: -0.5px;
+    }
+    .login-sub {
+      color: rgba(255,255,255,0.55); font-size: 13px;
+      margin: 0 0 36px; font-weight: 500;
+    }
+    .login-card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px; padding: 28px 24px;
+      width: 100%; max-width: 340px;
+    }
+    .pin-dots {
+      display: flex; justify-content: center; gap: 14px; margin-bottom: 22px;
+    }
+    .pin-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.35);
+      transition: all 0.2s ease;
+    }
+    .pin-dot.filled {
+      background: #fff;
+      border-color: #fff;
+      transform: scale(1.15);
+    }
+    #input-pin {
+      width: 100%; padding: 14px 16px;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      border-radius: 12px; color: #fff;
+      font-size: 22px; letter-spacing: 8px;
+      text-align: center; font-family: inherit;
+      font-weight: 700; outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+    }
+    #input-pin::placeholder { color: rgba(255,255,255,0.3); letter-spacing: 2px; font-size: 14px; font-weight: 400; }
+    #input-pin:focus { border-color: rgba(255,255,255,0.6); }
+    #btn-login {
+      width: 100%; padding: 14px; border: none;
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      color: #fff; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+      transition: all 0.2s;
+    }
+    #btn-login:active { transform: scale(0.97); }
+    #login-error {
+      color: #fca5a5; font-size: 13px; text-align: center;
+      margin-top: 10px; font-weight: 500;
+    }
+    .login-hint {
+      color: rgba(255,255,255,0.3); font-size: 11px;
+      text-align: center; margin-top: 18px;
+    }
+
+    /* ─── DARK MODE ──────────────────────────────────────────── */
+    body.dark-mode {
+      --bg: #0f0f1a; --card: #1a1a2e; --text: #e8e6ff; --muted: #9090b0;
+      --border: #2a2a45; --primary-light: rgba(99,102,241,0.18);
+      --success-light: rgba(16,185,129,0.18); --warning-light: rgba(245,158,11,0.18); --danger-light: rgba(239,68,68,0.18);
+    }
+    body.dark-mode header { background: linear-gradient(135deg, #0a0a15 0%, #1e1b4b 100%); }
+    body.dark-mode input[type="text"], body.dark-mode input[type="password"],
+    body.dark-mode textarea, body.dark-mode select { background: #12122a; color: var(--text); border-color: var(--border); }
+    body.dark-mode input:focus, body.dark-mode textarea:focus, body.dark-mode select:focus { background: #1a1a35; }
+    body.dark-mode .card { border-color: var(--border); }
+    body.dark-mode li.comment { background: #12122a; }
+    body.dark-mode #code-editor { background: #0a0a14 !important; }
+    body.dark-mode nav { background: #1a1a2e; border-top-color: var(--border); }
+    body.dark-mode .drive-status.disconnected { background: rgba(99,102,241,0.12); }
+    body.dark-mode .restore-item { background: #12122a; border-color: var(--border); }
+    body.dark-mode .restore-item:hover { background: var(--primary-light); }
+    body.dark-mode #pn-gdrive-bar { background: #12122a; border-color: var(--border); }
+    body.dark-mode #pn-gdrive-bar.connected { background: rgba(16,185,129,0.1); border-color: var(--success); }
+    body.dark-mode .gd-folder-section { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.4); }
+
+    /* ─── DARK TOGGLE & INSTALL ──────────────────────────────── */
+    .btn-dark-toggle {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; border-radius: 8px; width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; cursor: pointer; transition: background 0.2s; font-family: inherit;
+    }
+    .btn-dark-toggle:hover { background: rgba(255,255,255,0.22); }
+    #btn-install {
+      display: none; position: fixed; bottom: 82px; left: 18px;
+      background: linear-gradient(135deg, #10b981, #059669); color: #fff;
+      border: none; border-radius: 14px; padding: 10px 16px; font-size: 13px;
+      font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+      align-items: center; gap: 6px; z-index: 5; font-family: inherit;
+    }
+
+    /* ─── DRIVE STATUS BAR (Covo-inspired) ───────────────────── */
+    #pn-gdrive-bar {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border-radius: 12px; margin-bottom: 10px; background: #f8f9ff;
+      border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; transition: all 0.3s;
+    }
+    #pn-gdrive-bar.connected { background: var(--success-light); border-color: var(--success); }
+    .gd-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--muted); transition: all 0.3s; }
+    .gd-dot.connected { background: var(--success); box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+    .gd-dot.online    { background: var(--warning);  box-shadow: 0 0 5px rgba(245,158,11,0.5); }
+    .gd-dot.offline   { background: var(--danger);   box-shadow: 0 0 5px rgba(239,68,68,0.5); }
+    .gd-label { flex: 1; color: var(--text); }
+    .gd-time  { font-size: 11px; color: var(--muted); font-family: monospace; }
+    .gd-saving-indicator { font-size: 11px; color: var(--primary); font-weight: 700; animation: gdpulse 1.2s infinite; }
+    @keyframes gdpulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .gd-email-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--success-light); color: var(--success);
+      border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 8px;
+    }
+    .gd-folder-section {
+      background: var(--success-light); border: 1.5px solid rgba(16,185,129,0.4);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;
+    }
+    .gd-folder-section label { font-size: 12px; font-weight: 700; color: var(--success); display: block; margin-bottom: 6px; }
+    .gd-folder-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .gd-folder-row select { margin-bottom: 0; flex: 1; min-width: 140px; }
+    .gd-folder-row .btn { width: auto; padding: 8px 12px; font-size: 12px; }
+    .gd-action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .gd-action-row .btn { flex: 1; font-size: 13px; padding: 11px; }
+    .gd-files-count { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 4px 8px; background: var(--bg); border-radius: 8px; }
+
+    /* ─── HEADER ─────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%);
+      height: var(--header-h);
+      display: flex; align-items: center; justify-content: center;
+      position: sticky; top: 0; z-index: 10;
+      padding-top: env(safe-area-inset-top);
+      box-shadow: 0 2px 16px rgba(30,27,75,0.25);
+    }
+    #header-title {
+      font-weight: 700; font-size: 16px; color: #fff;
+      letter-spacing: 0.2px; pointer-events: none;
+    }
+    .btn-logout {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      color: #fff; border-radius: 10px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      font-family: inherit; z-index: 2;
+    }
+    .btn-logout:hover  { background: rgba(255,255,255,0.30); }
+    .btn-logout:active { transform: translateY(-50%) scale(0.88); }
+
+    /* ─── LAYOUT ─────────────────────────────────────────────── */
+    .container { padding: 14px 14px 90px; }
+
+    /* ─── CARDS ──────────────────────────────────────────────── */
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .card:active { transform: scale(0.985); }
+    .card.no-hover { cursor: default; }
+    .card.no-hover:active { transform: none; }
+
+    /* ─── BADGES ─────────────────────────────────────────────── */
+    .badge {
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      display: inline-block; margin-bottom: 8px; margin-right: 5px;
+      background: #f1f0ff; color: var(--primary);
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .prio-low  { background: var(--success-light); color: var(--success); }
+    .prio-medium { background: var(--warning-light); color: var(--gold); }
+    .prio-high { background: var(--danger-light); color: var(--danger); }
+
+    /* ─── TYPOGRAPHY ─────────────────────────────────────────── */
+    h2, h3 { margin: 0 0 10px; font-weight: 700; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin: 18px 0 10px; padding-left: 2px;
+    }
+
+    /* ─── FORM ELEMENTS ──────────────────────────────────────── */
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%; padding: 12px 14px;
+      border-radius: 10px; border: 1.5px solid var(--border);
+      background: #f8f9ff; color: var(--text);
+      font-size: 15px; font-family: inherit;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box; appearance: none; margin-bottom: 10px;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+      background: #fff;
+    }
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* ─── BUTTONS ─────────────────────────────────────────────── */
+    button.btn {
+      width: 100%; background: var(--primary); color: #fff;
+      border: none; padding: 13px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      gap: 7px; font-family: inherit; transition: all 0.2s;
+      box-shadow: 0 2px 10px rgba(79,70,229,0.25);
+    }
+    button.btn:active { transform: scale(0.97); }
+    button.btn.secondary {
+      background: #f1f0ff; color: var(--primary);
+      box-shadow: none; border: 1.5px solid #ddd8ff;
+    }
+    button.btn.success {
+      background: var(--success);
+      box-shadow: 0 2px 10px rgba(16,185,129,0.25);
+    }
+    button.btn.danger {
+      background: var(--danger); margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(239,68,68,0.25);
+    }
+    button.btn.info {
+      background: var(--info);
+      box-shadow: 0 2px 10px rgba(6,182,212,0.2);
+    }
+    button.btn.ai-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      box-shadow: 0 2px 12px rgba(139,92,246,0.35);
+      font-size: 14px; padding: 11px;
+    }
+
+    /* ─── NOTE INPUT AREA ───────────────────────────────────── */
+    .note-input-wrap {
+      position: relative; margin-bottom: 10px;
+    }
+    .note-input-wrap input[type="text"] {
+      margin-bottom: 0; padding-right: 48px;
+    }
+    .btn-ai-inline {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border: none; color: #fff; width: 32px; height: 32px;
+      border-radius: 8px; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .btn-ai-inline:active { transform: translateY(-50%) scale(0.92); }
+
+    /* ─── CODE EDITOR AREA ───────────────────────────────────── */
+    #code-editor {
+      font-family: 'Courier New', Courier, monospace !important;
+      font-size: 14px; line-height: 1.6;
+      background: #1e1b4b !important; color: #e2e8f0 !important;
+      border: none !important; border-radius: 12px !important;
+      padding: 16px !important; min-height: 180px;
+      box-shadow: 0 4px 20px rgba(30,27,75,0.2) !important;
+    }
+    #code-editor:focus {
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.3),
+                  0 4px 20px rgba(30,27,75,0.2) !important;
+    }
+    .editor-toolbar {
+      display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .editor-toolbar .btn {
+      flex: 1; min-width: 0; font-size: 13px; padding: 10px 8px;
+    }
+
+    /* ─── NAV ────────────────────────────────────────────────── */
+    nav {
+      position: fixed; bottom: 0; width: 100%;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around;
+      padding: 8px 0 max(10px, env(safe-area-inset-bottom));
+      z-index: 10;
+      box-shadow: 0 -4px 20px rgba(30,27,75,0.06);
+    }
+    nav button {
+      background: none; border: none; font-size: 11px;
+      color: var(--muted); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 4px 12px; font-family: inherit;
+      font-weight: 600; border-radius: 10px; transition: all 0.15s;
+    }
+    nav button .nav-icon { font-size: 21px; }
+    nav button.active { color: var(--primary); }
+    nav button.active .nav-icon { filter: none; }
+
+    /* ─── FAB ────────────────────────────────────────────────── */
+    .fab {
+      position: fixed; bottom: 82px; right: 18px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; width: 56px; height: 56px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 300;
+      box-shadow: 0 6px 20px rgba(79,70,229,0.4);
+      border: none; cursor: pointer; z-index: 5;
+      transition: transform 0.2s;
+    }
+    .fab:active { transform: scale(0.93); }
+
+    /* ─── MODALS ─────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,10,60,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 50; display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--card); width: 100%; max-width: 520px;
+      margin: 0 auto; border-radius: 20px 20px 0 0;
+      padding: 20px 20px max(20px, env(safe-area-inset-bottom));
+      transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+    .modal-handle {
+      width: 40px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 0 auto 16px;
+    }
+    .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+    /* ─── AI MODAL ───────────────────────────────────────────── */
+    #modal-ai .modal { border-radius: 20px 20px 0 0; }
+    .ai-result-box {
+      background: linear-gradient(135deg, #f8f5ff, #ede9fe);
+      border: 1.5px solid #c4b5fd; border-radius: 12px;
+      padding: 14px; min-height: 80px; font-size: 15px;
+      line-height: 1.6; color: var(--text); margin-bottom: 14px;
+      white-space: pre-wrap;
+    }
+    .ai-loading {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--primary); font-size: 14px; font-weight: 600;
+    }
+    .ai-spinner {
+      width: 20px; height: 20px; border: 2.5px solid var(--primary-light);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── COMMENTS ───────────────────────────────────────────── */
+    li.comment {
+      background: #f8f9ff; padding: 14px; border-radius: 12px;
+      margin-bottom: 10px; font-size: 14px; list-style: none;
+      border-left: 3px solid var(--primary);
+      display: flex; flex-direction: column;
+      transition: box-shadow 0.2s;
+    }
+    li.comment:hover { box-shadow: var(--shadow); }
+    li.comment.archived { border-left-color: var(--success); opacity: 0.75; }
+    .comment-text { font-size: 14px; line-height: 1.55; color: var(--text); }
+    .comment-date { font-size: 11px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+    .comment-actions {
+      display: flex; gap: 6px; margin-top: 10px;
+      border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px; flex-wrap: wrap;
+    }
+    .comment-actions button {
+      background: none; border: none; font-size: 12px; font-weight: 700;
+      cursor: pointer; padding: 5px 10px; border-radius: 7px;
+      font-family: inherit; transition: all 0.15s;
+    }
+    .btn-edit    { color: var(--primary); background: var(--primary-light) !important; }
+    .btn-delete  { color: var(--danger);  background: var(--danger-light) !important; }
+    .btn-validate{ color: var(--success); background: var(--success-light) !important; }
+    .btn-dissociate{ color: var(--gold); background: var(--warning-light) !important; }
+
+    /* ─── SETTINGS ───────────────────────────────────────────── */
+    .setting-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid var(--bg);
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 14px; font-weight: 600; }
+    .setting-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .switch { position: relative; display: inline-block; width: 48px; height: 28px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: var(--border); border-radius: 28px; transition: .3s;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 20px; width: 20px; left: 4px; bottom: 4px;
+      background: #fff; border-radius: 50%; transition: .3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    input:checked + .slider { background: var(--success); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* ─── CATEGORY EDIT ──────────────────────────────────────── */
+    .category-edit { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+    .category-edit input { margin-bottom: 0; flex: 1; }
+    .category-edit .btn { width: auto; padding: 10px 16px; }
+
+    /* ─── BACK BUTTON ────────────────────────────────────────── */
+    #btn-back {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 14px; font-size: 14px;
+    }
+
+    /* ─── EMPTY STATE ────────────────────────────────────────── */
+    .empty-state {
+      text-align: center; color: var(--muted);
+      padding: 36px 20px; font-size: 14px;
+    }
+    .empty-state-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+
+    /* ─── SNIPPET LIST ───────────────────────────────────────── */
+    #preview-frame {
+      width: 100%; height: 350px;
+      border: 2px solid var(--border); border-radius: 12px;
+      background: #fff; margin-top: 14px;
+    }
+
+    /* ─── SAVE SNIPPET BUTTON ────────────────────────────────── */
+    .btn-save-snippet {
+      background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+      color: #fff !important; border: none !important;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35) !important;
+      position: relative; overflow: hidden; transition: all 0.25s !important;
+    }
+    .btn-save-snippet::after {
+      content: ''; position: absolute; top: -50%; left: -60%;
+      width: 20%; height: 200%; background: rgba(255,255,255,0.15);
+      transform: rotate(30deg); transition: none;
+    }
+    .btn-save-snippet:hover::after { left: 120%; transition: left 0.6s ease; }
+
+    /* ─── FLEX ROW ───────────────────────────────────────────── */
+    .flex-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .flex-row > * { margin-bottom: 0 !important; }
+
+    /* ─── API KEY INPUT ──────────────────────────────────────── */
+    .api-key-wrap { position: relative; }
+    .api-key-wrap input { padding-right: 48px; }
+    .btn-toggle-api {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-60%);
+      background: none; border: none; cursor: pointer; font-size: 18px;
+      color: var(--muted); padding: 4px;
+    }
+
+    /* ─── AI BANNER ──────────────────────────────────────────── */
+    .ai-banner {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px; color: #fff;
+    }
+    .ai-banner-text { font-size: 13px; font-weight: 600; }
+    .ai-banner-sub { font-size: 11px; opacity: 0.75; }
+
+    /* ─── DRIVE STATUS ───────────────────────────────────────── */
+    .drive-status {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px; margin-bottom: 12px;
+      font-size: 13px; font-weight: 600;
+    }
+    .drive-status.connected { background: var(--success-light); color: var(--success); }
+    .drive-status.disconnected { background: #f1f0ff; color: var(--primary); }
+    .drive-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .drive-dot.on  { background: var(--success); }
+    .drive-dot.off { background: var(--muted); }
+    .last-backup-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--success-light); color: var(--success);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px;
+      font-weight: 600; margin-bottom: 12px;
+    }
+    /* ─── RESTORE LIST ────────────────────────────────────────── */
+    .restore-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 14px; border-radius: 10px; margin-bottom: 8px;
+      background: #f8f9ff; border: 1.5px solid var(--border);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .restore-item:hover { border-color: var(--primary); background: var(--primary-light); }
+    .restore-item-name { font-size: 14px; font-weight: 600; }
+    .restore-item-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .restore-list { max-height: 300px; overflow-y: auto; }
+    /* ─── MASTER BADGE ────────────────────────────────────────── */
+    .master-badge {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #fff; font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px;
+      margin-left: 8px; vertical-align: middle;
+    }
+
+    /* ─── LOGOUT BUTTON ──────────────────────────────────────── */
+    /* (styles définis dans le bloc header ci-dessus) */
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════ LOGIN ══════════════════════════════════════════════ -->
+  <div id="view-login">
+    <div class="login-logo">📝</div>
+    <h1 class="login-title">ProNote Pro</h1>
+    <p class="login-sub">Vos projets. Sécurisés.</p>
+
+    <div class="login-card">
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+      </div>
+      <input type="password" id="input-pin" placeholder="Code PIN ou mot de passe" maxlength="30" autocomplete="off">
+      <button id="btn-login">🔓 Déverrouiller</button>
+      <p id="login-error" class="hidden">❌ Code incorrect, réessayez.</p>
+    </div>
+    <p class="login-hint">Code par défaut : 1234</p>
+  </div>
+
+  <!-- ══════ HEADER ══════════════════════════════════════════════ -->
+  <header id="app-header" class="hidden">
+    <button class="btn-dark-toggle" id="btn-dark-toggle" onclick="App.toggleDarkMode()" title="Mode nuit">🌙</button>
+    <span id="header-title">ProNote Pro</span>
+    <button class="btn-logout" id="btn-logout" onclick="App.logout()" title="Verrouiller">🔒</button>
+  </header>
+  <button id="btn-install" onclick="App.installPwa()">📲 Installer</button>
+
+  <!-- ══════ PROJECTS LIST ══════════════════════════════════════ -->
+  <div id="view-projects" class="container hidden">
+    <div id="projects-list"></div>
+    <button class="fab" id="btn-show-add-project">+</button>
+  </div>
+
+  <!-- ══════ PROJECT DETAILS ════════════════════════════════════ -->
+  <div id="view-details" class="container hidden">
+    <button class="btn secondary" id="btn-back">← Retour</button>
+    <div id="project-detail-content" class="card no-hover"></div>
+
+    <div class="card no-hover">
+      <h3>📌 Notes Actives</h3>
+      <ul id="comments-list"></ul>
+      <div class="note-input-wrap">
+        <input type="text" id="input-new-comment" placeholder="Ajouter une note d'avancement…">
+        <button class="btn-ai-inline" id="btn-ai-note" title="Corriger/Reformuler avec l'IA">✨</button>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn" id="btn-submit-comment" style="flex:2;">+ Publier</button>
+      </div>
+    </div>
+
+    <div class="card no-hover" style="margin-top: 6px;">
+      <h3>📁 Archives</h3>
+      <ul id="archived-comments-list"></ul>
+    </div>
+
+    <button id="btn-delete-project" class="btn danger hidden" onclick="App.deleteProject()">🗑 Supprimer ce projet</button>
+  </div>
+
+  <!-- ══════ CODE EDITOR ════════════════════════════════════════ -->
+  <div id="view-tester" class="container hidden">
+    <div class="card no-hover">
+      <div class="ai-banner hidden" id="ai-banner">
+        <span style="font-size:22px;">✨</span>
+        <div>
+          <div class="ai-banner-text" id="ai-banner-text">1min.AI actif</div>
+          <div class="ai-banner-sub">Correction et reformulation disponibles</div>
+        </div>
+      </div>
+
+      <h3>🖥 Éditeur de Code</h3>
+
+      <div class="flex-row">
+        <input type="text" id="snippet-title" placeholder="Titre du snippet…" style="flex:1; margin-bottom:0;">
+        <button class="btn secondary" style="width:auto; padding: 0 14px;" onclick="App.clearSnippetForm()">Nouveau</button>
+      </div>
+      <select id="snippet-category" style="margin-top:0;"></select>
+
+      <textarea id="code-editor" rows="9" placeholder="<!-- Collez ou écrivez votre code HTML/CSS/JS ici -->"></textarea>
+
+      <div class="editor-toolbar">
+        <button class="btn btn-save-snippet" id="btn-save-snippet" onclick="App.saveSnippet()">
+          <span>💾 Enregistrer</span>
+        </button>
+        <button class="btn success" onclick="App.runCode()" style="flex:2;">▶ Tester</button>
+        <button class="btn ai-btn" id="btn-ai-code" onclick="App.openAiForCode()" title="Corriger/Reformuler le code avec l'IA">✨ IA</button>
+      </div>
+
+      <iframe id="preview-frame" class="hidden"></iframe>
+    </div>
+
+    <div class="card no-hover">
+      <h3>📚 Codes Sauvegardés</h3>
+      <ul id="snippets-list"></ul>
+    </div>
+  </div>
+
+  <!-- ══════ SETTINGS ═══════════════════════════════════════════ -->
+  <div id="view-settings" class="container hidden">
+
+    <div class="card no-hover">
+      <h3>🔒 Sécurité</h3>
+      <div class="section-title">Modifier le code PIN</div>
+      <input type="password" id="input-new-pin" placeholder="Nouveau PIN (vide = désactiver)" inputmode="numeric" maxlength="10">
+      <button class="btn secondary" onclick="App.savePin()">✅ Enregistrer le PIN</button>
+    </div>
+
+    <div class="card no-hover">
+      <h3>✨ Intelligence Artificielle — 1min.AI</h3>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 12px;">
+        Entrez votre clé API <strong>1min.AI</strong> pour activer la correction et reformulation automatique.
+        Obtenez votre clé sur <span style="color:var(--primary);">app.1min.ai</span>
+      </p>
+      <div class="api-key-wrap">
+        <input type="password" id="input-api-key" placeholder="Votre clé API 1min.AI…" autocomplete="off">
+        <button class="btn-toggle-api" onclick="App.toggleApiKeyVisibility()" id="btn-toggle-api">👁</button>
+      </div>
+      <div class="section-title" style="margin-top:4px;">Modèle IA</div>
+      <select id="select-ai-model">
+        <option value="gpt-4o-mini">⚡ GPT-4o Mini (rapide &amp; économique)</option>
+        <option value="gpt-4o">🧠 GPT-4o (puissant)</option>
+        <option value="gpt-4.1-mini">🚀 GPT-4.1 Mini</option>
+        <option value="claude-sonnet-4-5">🔵 Claude Sonnet 4.5</option>
+        <option value="claude-haiku-4-5">🔵 Claude Haiku 4.5 (rapide)</option>
+        <option value="deepseek-chat">🌊 DeepSeek Chat</option>
+        <option value="gemini-2.0-flash">✳️ Gemini 2.0 Flash</option>
+        <option value="mistral-nemo">🔥 Mistral Nemo</option>
+      </select>
+      <button class="btn secondary" onclick="App.saveApiKey()">💾 Enregistrer</button>
+    </div>
+
+    <div class="card no-hover">
+      <h3>☁️ Google Drive</h3>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 10px;">
+        Sauvegarde automatique sur Google Drive. Client ID OAuth 2.0 depuis <span style="color:var(--primary);">console.cloud.google.com</span>.
+      </p>
+
+      <!-- Barre de statut (style Covo) -->
+      <div id="pn-gdrive-bar">
+        <span class="gd-dot" id="gd-dot"></span>
+        <span class="gd-label" id="gd-label">Non connecté</span>
+        <span class="gd-saving-indicator hidden" id="gd-saving">⏳ Sauvegarde…</span>
+        <span class="gd-time" id="gd-time"></span>
+      </div>
+
+      <!-- Email utilisateur connecté -->
+      <div id="gd-email-display" class="hidden">
+        <div class="gd-email-chip">✅ <span id="gd-email-text"></span></div>
+      </div>
+
+      <!-- Saisie Client ID -->
+      <div class="api-key-wrap">
+        <input type="text" id="input-gcp-client-id" placeholder="123456789-xxx.apps.googleusercontent.com" autocomplete="off">
+      </div>
+      <button class="btn secondary" onclick="App.saveGcpClientId()" style="margin-bottom:10px;">💾 Enregistrer le Client ID</button>
+
+      <!-- Sélecteur de dossier (visible après connexion) -->
+      <div id="gd-folder-section" class="gd-folder-section hidden">
+        <label>📁 Dossier de destination :</label>
+        <div class="gd-folder-row">
+          <select id="gd-folder-select" onchange="App.onFolderSelect()">
+            <option value="">— AppData (privé) —</option>
+          </select>
+          <button class="btn secondary" onclick="App.refreshFolders()">🔄</button>
+        </div>
+        <div style="margin-top:6px; display:flex; gap:6px;">
+          <input type="text" id="gd-new-folder-name" placeholder="Nouveau dossier…" style="margin-bottom:0; flex:1; font-size:13px;">
+          <button class="btn success" onclick="App.createFolder()" style="width:auto; padding:8px 12px; font-size:12px;">+ Créer</button>
+        </div>
+        <div id="gd-files-count" class="gd-files-count hidden"></div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="gd-action-row" id="gd-actions" style="display:none;">
+        <button class="btn success" onclick="App.saveToDrive()">☁️ Sauvegarder</button>
+        <button class="btn info"    onclick="App.openRestoreModal()">📂 Restaurer</button>
+        <button class="btn secondary" id="btn-gdrive-disconnect" onclick="App.disconnectDrive()">✕ Déconnecter</button>
+      </div>
+      <button class="btn secondary hidden" id="btn-gdrive-connect" onclick="App.connectDrive()">🔗 Connecter Drive</button>
+    </div>
+
+    <div class="card no-hover">
+      <h3>💾 Sauvegarde locale</h3>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 12px;">
+        Exportez ou importez vos données en local (JSON).
+      </p>
+      <button class="btn" style="margin-bottom:10px;" onclick="App.exportData()">📥 Exporter</button>
+      <input type="file" id="import-file" class="hidden" accept=".json" onchange="App.importData(event)">
+      <button class="btn secondary" onclick="document.getElementById('import-file').click()">📤 Importer</button>
+    </div>
+
+    <div class="card no-hover">
+      <h3>⚙️ Préférences</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Modification / Suppression</div>
+          <div class="setting-sub">Autoriser la modification des notes</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-edit-mode">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card no-hover">
+      <h3>🗂 Mes Groupes</h3>
+      <div id="categories-list"></div>
+      <button class="btn secondary" id="btn-show-add-category" style="margin-top:10px;">+ Nouveau groupe</button>
+    </div>
+  </div>
+
+  <!-- ══════ NAV ═════════════════════════════════════════════════ -->
+  <nav id="main-nav" class="hidden">
+    <button id="tab-projects" class="active">
+      <span class="nav-icon">📋</span>Projets
+    </button>
+    <button id="tab-tester">
+      <span class="nav-icon">💻</span>Code
+    </button>
+    <button id="tab-settings">
+      <span class="nav-icon">⚙️</span>Réglages
+    </button>
+  </nav>
+
+  <!-- ══════ MODALS ══════════════════════════════════════════════ -->
+
+  <!-- New Project -->
+  <div class="modal-overlay" id="modal-project">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>✏️ Nouveau Projet</h3>
+      <form id="form-add-project">
+        <input type="text" id="input-project-title" placeholder="Nom du projet" required>
+        <select id="select-project-category" required></select>
+        <select id="select-project-priority" required>
+          <option value="low">🟢 Priorité Basse</option>
+          <option value="medium" selected>🟡 Priorité Moyenne</option>
+          <option value="high">🔴 Priorité Haute</option>
+        </select>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary btn-close-modal" style="flex:1;">Annuler</button>
+          <button type="submit" class="btn" style="flex:2;">Créer le projet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- New Category -->
+  <div class="modal-overlay" id="modal-category">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>🗂 Nouveau Groupe</h3>
+      <form id="form-add-category">
+        <input type="text" id="input-category-name" placeholder="Nom du groupe" required>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary btn-close-modal" style="flex:1;">Annuler</button>
+          <button type="submit" class="btn" style="flex:2;">Créer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Comment -->
+  <div class="modal-overlay" id="modal-edit-comment">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>✏️ Modifier la note</h3>
+      <form id="form-edit-comment">
+        <textarea id="input-edit-comment" placeholder="Votre note…" required style="min-height:90px;"></textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary btn-close-modal" style="flex:1;">Annuler</button>
+          <button type="submit" class="btn" style="flex:2;">Mettre à jour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Drive Restore Picker -->
+  <div class="modal-overlay" id="modal-drive-restore">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>📂 Choisir une sauvegarde Drive</h3>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 14px;">Sélectionnez la sauvegarde à restaurer :</p>
+      <div class="restore-list" id="restore-list">
+        <div style="text-align:center; padding:20px; color:var(--muted);">
+          <div class="ai-spinner" style="margin:0 auto 10px;"></div>
+          Chargement des sauvegardes…
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button type="button" class="btn secondary btn-close-modal" style="flex:1;">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Reformulation Modal -->
+  <div class="modal-overlay" id="modal-ai">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>✨ Correction IA</h3>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 12px;" id="ai-modal-label">Texte original :</p>
+      <div style="background:#f8f9ff; border:1.5px solid var(--border); border-radius:10px; padding:12px; font-size:13px; color:var(--muted); margin-bottom:14px; max-height:80px; overflow-y:auto;" id="ai-original-box"></div>
+      <p style="font-size:13px; color:var(--primary); font-weight:700; margin:0 0 8px;">✨ Suggestion IA :</p>
+      <div class="ai-result-box" id="ai-result-box">
+        <div class="ai-loading" id="ai-loading">
+          <div class="ai-spinner"></div>
+          Analyse en cours…
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary btn-close-modal" style="flex:1;">✕ Ignorer</button>
+        <button type="button" class="btn ai-btn" id="btn-ai-accept" style="flex:2;">✅ Appliquer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════
+       ÉTAT GLOBAL
+    ═══════════════════════════════════════════════ */
+    const PrioConfig = {
+      'low':    { label: 'Basse',   css: 'prio-low' },
+      'medium': { label: 'Moyenne', css: 'prio-medium' },
+      'high':   { label: 'Haute',   css: 'prio-high' }
+    };
+
+    const State = {
+      categories: JSON.parse(localStorage.getItem('pn_categories')) || [{ id: "cat_1", name: "Général" }],
+      projects:   JSON.parse(localStorage.getItem('pn_projects'))   || [],
+      snippets:   JSON.parse(localStorage.getItem('pn_snippets'))   || [],
+      settings:   JSON.parse(localStorage.getItem('pn_settings'))   || { allowEditDelete: true, pin: "1234", apiKey: "", aiModel: "gpt-4o-mini", gcpClientId: "", lastDriveBackup: null },
+      currentProjectId: null,
+      currentSnippetId: null,
+      currentCommentId: null,
+      isAuthenticated: false,
+
+      save() {
+        localStorage.setItem('pn_categories', JSON.stringify(this.categories));
+        localStorage.setItem('pn_projects',   JSON.stringify(this.projects));
+        localStorage.setItem('pn_snippets',   JSON.stringify(this.snippets));
+        localStorage.setItem('pn_settings',   JSON.stringify(this.settings));
+      },
+      generateId: () => '_' + Math.random().toString(36).substr(2, 9)
+    };
+
+    const MASTER_PASSWORD = 'Aliand081089';
+    let driveAccessToken = null;
+    let driveTokenClient = null;
+
+    /* ═══════════════════════════════════════════════
+       UI
+    ═══════════════════════════════════════════════ */
+    const UI = {
+      views: ['view-login','view-projects','view-details','view-tester','view-settings'],
+      tabs:  ['tab-projects','tab-tester','tab-settings'],
+
+      switchView(viewId, title) {
+        this.views.forEach(v => {
+          const el = document.getElementById(v);
+          el.classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+
+        const hdr = document.getElementById('app-header');
+        const titleEl = document.getElementById('header-title');
+        if (viewId === 'view-login') {
+          hdr.classList.add('hidden');
+          document.getElementById('main-nav').classList.add('hidden');
+        } else {
+          hdr.classList.remove('hidden');
+          if (titleEl) titleEl.textContent = title;
+          if (State.isAuthenticated) {
+            document.getElementById('main-nav').classList.remove('hidden');
+          }
+        }
+
+        this.tabs.forEach(t => document.getElementById(t)?.classList.remove('active'));
+        if (viewId === 'view-projects') document.getElementById('tab-projects').classList.add('active');
+        if (viewId === 'view-tester')   document.getElementById('tab-tester').classList.add('active');
+        if (viewId === 'view-settings') document.getElementById('tab-settings').classList.add('active');
+
+        App.refreshView(viewId);
+      },
+      openModal(id)  { document.getElementById(id).classList.add('active'); },
+      closeModals()  { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+    };
+
+    /* ═══════════════════════════════════════════════
+       PIN DOTS
+    ═══════════════════════════════════════════════ */
+    function updatePinDots(value) {
+      const len = value.length;
+      for (let i = 0; i < 4; i++) {
+        // Si le mot de passe est plus long que 4, tous les dots s'allument
+        document.getElementById(`dot-${i}`).classList.toggle('filled', len > 4 ? true : i < len);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════
+       APP
+    ═══════════════════════════════════════════════ */
+    const App = {
+      aiTarget: null, // 'note' | 'code'
+
+      init() {
+        this.bindEvents();
+        this.checkAuth();
+        /* Dark mode restore */
+        if (localStorage.getItem('pn_dark_mode') === 'true') {
+          document.body.classList.add('dark-mode');
+          const btn = document.getElementById('btn-dark-toggle');
+          if (btn) btn.textContent = '☀️';
+        }
+        /* Network status */
+        const updateNet = () => App._gdUpdateBar && App._gdUpdateBar();
+        window.addEventListener('online',  updateNet);
+        window.addEventListener('offline', updateNet);
+      },
+
+      logout() {
+        State.isAuthenticated = false;
+        driveAccessToken = null;
+        const badge = document.querySelector('.master-badge');
+        if (badge) badge.remove();
+        const titleEl = document.getElementById('header-title');
+        if (titleEl) titleEl.textContent = 'ProNote Pro';
+        UI.closeModals();
+        UI.switchView('view-login', 'Verrouillé');
+      },
+
+      checkAuth() {
+        if (!State.settings.pin || State.settings.pin === "") {
+          State.isAuthenticated = true;
+          UI.switchView('view-projects', '📋 Mes Projets');
+        } else {
+          UI.switchView('view-login', 'Verrouillé');
+        }
+      },
+
+      bindEvents() {
+        /* PIN input dots */
+        document.getElementById('input-pin').addEventListener('input', e => {
+          updatePinDots(e.target.value);
+        });
+        document.getElementById('input-pin').addEventListener('keydown', e => {
+          if (e.key === 'Enter') document.getElementById('btn-login').click();
+        });
+
+        /* Login */
+        document.getElementById('btn-login').addEventListener('click', () => {
+          const input = document.getElementById('input-pin').value;
+          const isMaster = (input === MASTER_PASSWORD);
+          const isPin    = (input === State.settings.pin && input !== "");
+          if (isMaster || isPin) {
+            State.isAuthenticated = true;
+            document.getElementById('input-pin').value = '';
+            updatePinDots('');
+            document.getElementById('login-error').classList.add('hidden');
+            if (isMaster && !isPin) {
+              /* Accès maître — badge discret dans le header */
+              setTimeout(() => {
+                const hdr = document.getElementById('app-header');
+                if (!hdr.querySelector('.master-badge')) {
+                  const b = document.createElement('span');
+                  b.className = 'master-badge'; b.textContent = 'MASTER';
+                  hdr.appendChild(b);
+                }
+              }, 300);
+            }
+            UI.switchView('view-projects', '📋 Mes Projets');
+          } else {
+            document.getElementById('login-error').classList.remove('hidden');
+            const card = document.querySelector('.login-card');
+            card.style.animation = 'none';
+            setTimeout(() => { card.style.animation = 'shake 0.35s'; }, 10);
+          }
+        });
+
+        /* Nav */
+        document.getElementById('tab-projects').addEventListener('click', () => UI.switchView('view-projects', '📋 Mes Projets'));
+        document.getElementById('tab-tester').addEventListener('click',   () => UI.switchView('view-tester', '💻 Éditeur de Code'));
+        document.getElementById('tab-settings').addEventListener('click', () => UI.switchView('view-settings', '⚙️ Paramètres'));
+        document.getElementById('btn-back').addEventListener('click',     () => UI.switchView('view-projects', '📋 Mes Projets'));
+
+        /* Modals */
+        document.getElementById('btn-show-add-project').addEventListener('click', () => {
+          this.populateCategorySelect('select-project-category');
+          UI.openModal('modal-project');
+        });
+        document.getElementById('btn-show-add-category').addEventListener('click', () => UI.openModal('modal-category'));
+        document.querySelectorAll('.btn-close-modal').forEach(btn => btn.addEventListener('click', () => UI.closeModals()));
+
+        /* Forms */
+        document.getElementById('form-add-project').addEventListener('submit',  this.handleCreateProject.bind(this));
+        document.getElementById('form-add-category').addEventListener('submit', this.handleCreateCategory.bind(this));
+        document.getElementById('form-edit-comment').addEventListener('submit', this.handleEditComment.bind(this));
+
+        /* Note submit */
+        document.getElementById('btn-submit-comment').addEventListener('click', () => {
+          const input = document.getElementById('input-new-comment');
+          if (input.value.trim() === "") return;
+          const project = State.projects.find(p => p.id === State.currentProjectId);
+          project.comments.push({ id: State.generateId(), text: input.value.trim(), date: new Date().toLocaleString('fr-FR'), archived: false });
+          State.save();
+          this.renderComments();
+          input.value = "";
+        });
+
+        /* AI note button */
+        document.getElementById('btn-ai-note').addEventListener('click', () => {
+          const text = document.getElementById('input-new-comment').value.trim();
+          if (!text) return alert("Saisissez d'abord une note à corriger.");
+          this.openAiModal('note', text);
+        });
+
+        /* AI accept */
+        document.getElementById('btn-ai-accept').addEventListener('click', () => {
+          const result = document.getElementById('ai-result-box').dataset.result;
+          if (!result) return;
+          if (this.aiTarget === 'note') {
+            document.getElementById('input-new-comment').value = result;
+          } else if (this.aiTarget === 'code') {
+            document.getElementById('code-editor').value = result;
+          } else if (this.aiTarget === 'edit-comment') {
+            document.getElementById('input-edit-comment').value = result;
+          }
+          UI.closeModals();
+        });
+
+        /* Toggle edit mode */
+        document.getElementById('toggle-edit-mode').addEventListener('change', e => {
+          State.settings.allowEditDelete = e.target.checked;
+          State.save();
+          this.refreshView('view-tester');
+        });
+
+        /* Code editor */
+        document.getElementById('code-editor').addEventListener('input', e => {
+          const frame = document.getElementById('preview-frame');
+          frame.classList.toggle('hidden', e.target.value.trim() === "");
+        });
+      },
+
+      /* ─────────────────────────────────────────── */
+      refreshView(viewId) {
+        if (viewId === 'view-projects') this.renderProjects();
+        if (viewId === 'view-settings') this.renderSettings();
+        if (viewId === 'view-tester')   this.renderTester();
+      },
+
+      /* ─────────────────────────────────────────── */
+      renderTester() {
+        this.populateCategorySelect('snippet-category', true);
+        this.renderSnippetsList();
+        const hasKey = !!(State.settings.apiKey && State.settings.apiKey.trim());
+        document.getElementById('ai-banner').classList.toggle('hidden', !hasKey);
+        if (hasKey) {
+          const model = State.settings.aiModel || "gpt-4o-mini";
+          document.getElementById('ai-banner-text').textContent = `1min.AI actif — ${model}`;
+        }
+      },
+
+      /* ─────────────────────────────────────────── */
+      runCode() {
+        const code = document.getElementById('code-editor').value;
+        const frame = document.getElementById('preview-frame');
+        if (!code.trim()) return alert("Le code est vide !");
+        frame.srcdoc = code;
+        frame.classList.remove('hidden');
+        setTimeout(() => {
+          if (frame.requestFullscreen) frame.requestFullscreen();
+          else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+        }, 100);
+      },
+
+      clearSnippetForm() {
+        State.currentSnippetId = null;
+        document.getElementById('snippet-title').value = "";
+        document.getElementById('code-editor').value = "";
+        document.getElementById('snippet-category').selectedIndex = 0;
+        document.getElementById('btn-save-snippet').querySelector('span').textContent = '💾 Enregistrer';
+        document.getElementById('preview-frame').srcdoc = "";
+        document.getElementById('preview-frame').classList.add('hidden');
+      },
+
+      saveSnippet() {
+        const title      = document.getElementById('snippet-title').value.trim();
+        const categoryId = document.getElementById('snippet-category').value;
+        const code       = document.getElementById('code-editor').value;
+        if (!title) return alert("Veuillez donner un titre à votre snippet.");
+        if (!code)  return alert("Le champ code est vide.");
+        if (State.currentSnippetId) {
+          const s = State.snippets.find(s => s.id === State.currentSnippetId);
+          if (s) { s.title = title; s.categoryId = categoryId; s.code = code; alert("Code mis à jour !"); }
+        } else {
+          State.snippets.push({ id: State.generateId(), title, categoryId, code, date: new Date().toLocaleDateString('fr-FR') });
+          alert("Code sauvegardé !");
+        }
+        State.save(); this.renderSnippetsList();
+      },
+
+      renderSnippetsList() {
+        const list = document.getElementById('snippets-list');
+        list.innerHTML = '';
+        if (State.snippets.length === 0) {
+          list.innerHTML = `<li class="empty-state"><span class="empty-state-icon">💾</span>Aucun code sauvegardé.</li>`;
+          return;
+        }
+        State.snippets.forEach(snippet => {
+          const cat     = State.categories.find(c => c.id === snippet.categoryId);
+          const catName = cat ? cat.name : "Non classé";
+          const li      = document.createElement('li');
+          li.className  = 'comment';
+          let html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+              <strong style="font-size:15px;">${snippet.title}</strong>
+              <span class="badge">${catName}</span>
+            </div>
+            <div class="comment-actions">
+              <button class="btn-validate" onclick="App.loadSnippet('${snippet.id}')">▶ Charger</button>`;
+          if (State.settings.allowEditDelete) {
+            html += `
+              <button class="btn-edit"       onclick="App.editSnippet('${snippet.id}')">✏️ Modifier</button>
+              <button class="btn-dissociate" onclick="App.dissociateSnippet('${snippet.id}')">🔗 Dissocier</button>
+              <button class="btn-delete"     onclick="App.deleteSnippet('${snippet.id}')">❌ Supprimer</button>`;
+          }
+          html += `</div>`;
+          li.innerHTML = html;
+          list.appendChild(li);
+        });
+      },
+
+      loadSnippet(id) {
+        const s = State.snippets.find(s => s.id === id);
+        if (!s) return;
+        document.getElementById('code-editor').value = s.code;
+        this.runCode();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      editSnippet(id) {
+        const s = State.snippets.find(s => s.id === id);
+        if (!s) return;
+        State.currentSnippetId = id;
+        document.getElementById('snippet-title').value    = s.title;
+        document.getElementById('snippet-category').value = s.categoryId || "";
+        document.getElementById('code-editor').value      = s.code;
+        document.getElementById('btn-save-snippet').querySelector('span').textContent = '💾 Mettre à jour';
+        this.runCode();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      dissociateSnippet(id) {
+        const s = State.snippets.find(s => s.id === id);
+        if (s) { s.categoryId = ""; State.save(); this.renderSnippetsList(); }
+      },
+
+      deleteSnippet(id) {
+        if (!confirm("Supprimer ce bout de code ?")) return;
+        State.snippets = State.snippets.filter(s => s.id !== id);
+        if (State.currentSnippetId === id) this.clearSnippetForm();
+        State.save(); this.renderSnippetsList();
+      },
+
+      populateCategorySelect(selectId, allowEmpty = false) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '';
+        if (allowEmpty) {
+          const o = document.createElement('option');
+          o.value = ""; o.textContent = "— Non classé —";
+          select.appendChild(o);
+        }
+        State.categories.forEach(cat => {
+          const o = document.createElement('option');
+          o.value = cat.id; o.textContent = cat.name;
+          select.appendChild(o);
+        });
+      },
+
+      renderProjects() {
+        const container = document.getElementById('projects-list');
+        container.innerHTML = '';
+        if (State.projects.length === 0) {
+          container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">📋</span>Aucun projet.<br>Appuyez sur <strong>+</strong> pour commencer.</div>`;
+          return;
+        }
+        State.projects.forEach(project => {
+          const category   = State.categories.find(c => c.id === project.categoryId) || { name: "Non classé" };
+          const prio       = PrioConfig[project.priority || 'medium'];
+          const activeNotes = project.comments.filter(c => !c.archived).length;
+          const card       = document.createElement('div');
+          card.className   = 'card';
+          card.innerHTML   = `
+            <span class="badge">${category.name}</span>
+            <span class="badge ${prio.css}">${prio.label}</span>
+            <h3>${project.title}</h3>
+            <p style="color:var(--muted);font-size:13px;margin:4px 0 0;">${activeNotes} note${activeNotes>1?'s':''} en cours</p>`;
+          card.addEventListener('click', () => this.openProject(project.id));
+          container.appendChild(card);
+        });
+      },
+
+      openProject(id) {
+        State.currentProjectId = id;
+        const project  = State.projects.find(p => p.id === id);
+        const category = State.categories.find(c => c.id === project.categoryId) || { name: "Non classé" };
+        const prio     = PrioConfig[project.priority || 'medium'];
+        document.getElementById('project-detail-content').innerHTML = `
+          <span class="badge">${category.name}</span>
+          <span class="badge ${prio.css}">${prio.label}</span>
+          <h2 style="margin-top:6px;">${project.title}</h2>`;
+        document.getElementById('btn-delete-project').classList.toggle('hidden', !State.settings.allowEditDelete);
+        this.renderComments();
+        UI.switchView('view-details', project.title);
+      },
+
+      renderComments() {
+        const project        = State.projects.find(p => p.id === State.currentProjectId);
+        const listActive     = document.getElementById('comments-list');
+        const listArchived   = document.getElementById('archived-comments-list');
+        listActive.innerHTML = listArchived.innerHTML = '';
+        const activeComments   = project.comments.filter(c => !c.archived);
+        const archivedComments = project.comments.filter(c => c.archived);
+        if (activeComments.length === 0)
+          listActive.innerHTML = `<li style="text-align:center;color:var(--muted);font-size:13px;padding:10px 0;">Aucune note active.</li>`;
+        else
+          activeComments.forEach(c => listActive.appendChild(this.createCommentElement(c)));
+        if (archivedComments.length === 0)
+          listArchived.innerHTML = `<li style="text-align:center;color:var(--muted);font-size:13px;padding:10px 0;">Aucune archive.</li>`;
+        else
+          archivedComments.forEach(c => listArchived.appendChild(this.createCommentElement(c, true)));
+      },
+
+      createCommentElement(comment, isArchived = false) {
+        const li = document.createElement('li');
+        li.className = 'comment' + (isArchived ? ' archived' : '');
+        let html = `
+          <span class="comment-text">${comment.text}</span>
+          <span class="comment-date">${comment.date || ''}</span>
+          <div class="comment-actions">`;
+        if (!isArchived)
+          html += `<button class="btn-validate" onclick="App.archiveComment('${comment.id}')">✓ Valider</button>`;
+        else
+          html += `<button class="btn-validate" onclick="App.unarchiveComment('${comment.id}')">⟲ Restaurer</button>`;
+        if (State.settings.allowEditDelete) {
+          html += `
+            <button class="btn-edit"   onclick="App.editComment('${comment.id}')">✏️ Modifier</button>
+            <button class="btn-delete" onclick="App.deleteComment('${comment.id}')">❌ Suppr.</button>`;
+        }
+        html += `<button class="btn-validate" style="background:#f8f5ff!important;color:#8b5cf6;" onclick="App.openAiForComment('${comment.id}')">✨ IA</button>`;
+        html += `</div>`;
+        li.innerHTML = html;
+        return li;
+      },
+
+      archiveComment(id) {
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        p.comments.find(c => c.id === id).archived = true;
+        State.save(); this.renderComments();
+      },
+      unarchiveComment(id) {
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        p.comments.find(c => c.id === id).archived = false;
+        State.save(); this.renderComments();
+      },
+      deleteComment(id) {
+        if (!confirm("Voulez-vous supprimer cette note ?")) return;
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        p.comments = p.comments.filter(c => c.id !== id);
+        State.save(); this.renderComments();
+      },
+      editComment(id) {
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        const c = p.comments.find(c => c.id === id);
+        State.currentCommentId = id;
+        document.getElementById('input-edit-comment').value = c.text;
+        UI.openModal('modal-edit-comment');
+      },
+      handleEditComment(e) {
+        e.preventDefault();
+        const p    = State.projects.find(p => p.id === State.currentProjectId);
+        const c    = p.comments.find(c => c.id === State.currentCommentId);
+        const text = document.getElementById('input-edit-comment').value;
+        if (text.trim() !== "") { c.text = text.trim(); State.save(); this.renderComments(); UI.closeModals(); }
+      },
+      deleteProject() {
+        if (!confirm("Voulez-vous supprimer ce projet DÉFINITIVEMENT ?")) return;
+        State.projects = State.projects.filter(p => p.id !== State.currentProjectId);
+        State.currentProjectId = null;
+        State.save();
+        UI.switchView('view-projects', '📋 Mes Projets');
+      },
+
+      /* ─── FORMS ─────────────────────────────────── */
+      handleCreateProject(e) {
+        e.preventDefault();
+        State.projects.push({
+          id: State.generateId(),
+          title: document.getElementById('input-project-title').value,
+          categoryId: document.getElementById('select-project-category').value,
+          priority: document.getElementById('select-project-priority').value,
+          comments: []
+        });
+        State.save();
+        document.getElementById('form-add-project').reset();
+        UI.closeModals();
+        this.renderProjects();
+      },
+      handleCreateCategory(e) {
+        e.preventDefault();
+        State.categories.push({ id: State.generateId(), name: document.getElementById('input-category-name').value });
+        State.save();
+        document.getElementById('form-add-category').reset();
+        UI.closeModals();
+        this.renderSettings();
+      },
+
+      /* ─── SETTINGS ──────────────────────────────── */
+      renderSettings() {
+        document.getElementById('toggle-edit-mode').checked = State.settings.allowEditDelete;
+        document.getElementById('input-new-pin').value = State.settings.pin || "";
+        document.getElementById('input-api-key').value = State.settings.apiKey || "";
+        document.getElementById('input-gcp-client-id').value = State.settings.gcpClientId || "";
+        const modelSel = document.getElementById('select-ai-model');
+        if (modelSel) modelSel.value = State.settings.aiModel || "gpt-4o-mini";
+        /* Drive UI */
+        this._gdUpdateBar();
+        this._gdUpdateUI(!!driveAccessToken);
+        const container = document.getElementById('categories-list');
+        container.innerHTML = '';
+        State.categories.forEach(category => {
+          const div   = document.createElement('div');
+          div.className = 'category-edit';
+          const input = document.createElement('input');
+          input.type  = 'text';
+          input.value = category.name;
+          const btn   = document.createElement('button');
+          btn.className = 'btn success';
+          btn.style.width = 'auto';
+          btn.textContent = '✓';
+          btn.addEventListener('click', () => {
+            category.name = input.value;
+            State.save();
+            btn.textContent = '✓ OK';
+            setTimeout(() => btn.textContent = '✓', 1500);
+          });
+          div.appendChild(input);
+          div.appendChild(btn);
+          container.appendChild(div);
+        });
+      },
+
+      savePin() {
+        const newPin = document.getElementById('input-new-pin').value;
+        State.settings.pin = newPin;
+        State.save();
+        alert(newPin === "" ? "🔓 Protection par code PIN désactivée." : "✅ Nouveau code PIN enregistré !");
+      },
+
+      saveApiKey() {
+        const key   = document.getElementById('input-api-key').value.trim();
+        const model = document.getElementById('select-ai-model')?.value || "gpt-4o-mini";
+        State.settings.apiKey  = key;
+        State.settings.aiModel = model;
+        State.save();
+        this.renderTester();
+        alert(key ? `✅ Clé API 1min.AI enregistrée !\nModèle : ${model}` : "Clé API supprimée.");
+      },
+
+      toggleApiKeyVisibility() {
+        const input = document.getElementById('input-api-key');
+        const btn   = document.getElementById('btn-toggle-api');
+        if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+        else { input.type = 'password'; btn.textContent = '👁'; }
+      },
+
+      /* ─── GOOGLE DRIVE ──────────────────────────── */
+      saveGcpClientId() {
+        const id = document.getElementById('input-gcp-client-id').value.trim();
+        State.settings.gcpClientId = id;
+        State.save();
+        driveAccessToken = null;
+        driveTokenClient = null;
+        this._gdUpdateBar();
+        this._gdUpdateUI(false);
+        alert(id ? "✅ Client ID enregistré !\nCliquez sur 'Connecter Drive' pour vous authentifier." : "Client ID supprimé.");
+      },
+
+      /* ─── DRIVE — Barre de statut Covo-style ─── */
+      _gdUpdateBar(time) {
+        const dot  = document.getElementById('gd-dot');
+        const lbl  = document.getElementById('gd-label');
+        const tm   = document.getElementById('gd-time');
+        const bar  = document.getElementById('pn-gdrive-bar');
+        if (!dot) return;
+        const conn   = !!driveAccessToken;
+        const online = navigator.onLine;
+        dot.className = 'gd-dot ' + (conn ? 'connected' : (online ? 'online' : 'offline'));
+        bar.className = conn ? 'connected' : '';
+        if (conn) {
+          lbl.textContent = '☁️ Drive connecté — ' + (State.settings.driveEmail || 'Connecté');
+          lbl.style.color = 'var(--success)';
+        } else if (online) {
+          lbl.textContent = '● En ligne (Drive non connecté)';
+          lbl.style.color = 'var(--gold)';
+        } else {
+          lbl.textContent = '● Hors ligne';
+          lbl.style.color = 'var(--danger)';
+        }
+        if (tm) {
+          const lastTime = time || State.settings.lastDriveBackup;
+          if (lastTime && conn) {
+            const d = new Date(lastTime);
+            const today = d.toDateString() === new Date().toDateString();
+            tm.textContent = '· ' + (today
+              ? d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit',second:'2-digit'})
+              : d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
+          } else { tm.textContent = ''; }
+        }
+      },
+
+      _gdShowSaving(show) {
+        const el = document.getElementById('gd-saving');
+        if (el) el.classList.toggle('hidden', !show);
+      },
+
+      _gdUpdateUI(connected) {
+        /* Email */
+        const emailDisp = document.getElementById('gd-email-display');
+        const emailText = document.getElementById('gd-email-text');
+        if (emailDisp && emailText) {
+          emailDisp.classList.toggle('hidden', !connected || !State.settings.driveEmail);
+          if (connected && State.settings.driveEmail) emailText.textContent = State.settings.driveEmail;
+        }
+        /* Dossier */
+        const folderSec = document.getElementById('gd-folder-section');
+        if (folderSec) folderSec.classList.toggle('hidden', !connected);
+        /* Boutons */
+        const actions  = document.getElementById('gd-actions');
+        const btnConn  = document.getElementById('btn-gdrive-connect');
+        if (actions)  actions.style.display  = connected ? 'flex' : 'none';
+        if (btnConn)  btnConn.classList.toggle('hidden', connected || !State.settings.gcpClientId);
+        /* Files count */
+        document.getElementById('gd-files-count')?.classList.add('hidden');
+      },
+
+      connectDrive() {
+        const clientId = State.settings.gcpClientId;
+        if (!clientId) return alert("Veuillez d'abord enregistrer un Client ID Google.");
+        const scope = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/oauth2/v2/userinfo.email';
+        const loadGIS = () => new Promise((res, rej) => {
+          if (window.google?.accounts?.oauth2) { res(); return; }
+          const s = document.createElement('script');
+          s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+          s.onload = res; s.onerror = () => rej(new Error('Impossible de charger Google Identity Services'));
+          document.head.appendChild(s);
+        });
+        loadGIS().then(() => {
+          driveTokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId, scope,
+            callback: async (resp) => {
+              if (resp.error) { alert("❌ Erreur de connexion Drive : " + resp.error); return; }
+              driveAccessToken = resp.access_token;
+              /* Fetch email */
+              try {
+                const info = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',
+                  {headers:{Authorization:'Bearer '+driveAccessToken}}).then(r=>r.json());
+                State.settings.driveEmail = info.email || '';
+                State.save();
+              } catch(e){}
+              this._gdUpdateBar();
+              this._gdUpdateUI(true);
+              await this.refreshFolders();
+              alert("✅ Google Drive connecté ! Sauvegarde automatique disponible.");
+            }
+          });
+          driveTokenClient.requestAccessToken({ prompt:'' });
+        }).catch(err => alert("❌ " + err.message));
+      },
+
+      disconnectDrive() {
+        driveAccessToken = null;
+        State.settings.driveEmail = '';
+        State.save();
+        this._gdUpdateBar();
+        this._gdUpdateUI(false);
+      },
+
+      async refreshFolders() {
+        if (!driveAccessToken) return;
+        const sel = document.getElementById('gd-folder-select');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— AppData (privé) —</option>';
+        try {
+          const resp = await fetch("https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&fields=files(id,name)&pageSize=50&orderBy=name", {headers:{Authorization:'Bearer '+driveAccessToken}});
+          if (!resp.ok) throw new Error('HTTP '+resp.status);
+          const data = await resp.json();
+          (data.files||[]).forEach(f => {
+            const o = document.createElement('option'); o.value = f.id; o.textContent = '📁 '+f.name;
+            if (f.id === State.settings.driveFolderId) o.selected = true;
+            sel.appendChild(o);
+          });
+        } catch(e) { console.warn('Folders:', e); }
+      },
+
+      onFolderSelect() {
+        const sel = document.getElementById('gd-folder-select');
+        State.settings.driveFolderId = sel?.value || '';
+        State.settings.driveFolderName = sel?.options[sel.selectedIndex]?.textContent?.replace('📁 ','') || 'AppData';
+        State.save();
+      },
+
+      async createFolder() {
+        const input = document.getElementById('gd-new-folder-name');
+        const name  = input?.value.trim();
+        if (!name) return alert("Entrez un nom de dossier.");
+        if (!driveAccessToken) return alert("Connectez-vous d'abord à Drive.");
+        try {
+          const resp = await fetch('https://www.googleapis.com/drive/v3/files', {
+            method:'POST', headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'application/json'},
+            body: JSON.stringify({name, mimeType:'application/vnd.google-apps.folder'})
+          });
+          if (!resp.ok) throw new Error('HTTP '+resp.status);
+          const f = await resp.json();
+          State.settings.driveFolderId = f.id;
+          State.settings.driveFolderName = name;
+          State.save();
+          if (input) input.value = '';
+          await this.refreshFolders();
+          const sel = document.getElementById('gd-folder-select');
+          if (sel) sel.value = f.id;
+          alert('✅ Dossier "'+name+'" créé et sélectionné.');
+        } catch(e) { alert("❌ " + e.message); }
+      },
+
+      async saveToDrive() {
+        if (!driveAccessToken) return alert("Connectez-vous d'abord à Google Drive.");
+        this._gdShowSaving(true);
+        const now   = new Date();
+        const fName = `pronote_backup_${now.toLocaleDateString('fr-FR').replace(/\//g,'-')}_${now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace(':','-')}.json`;
+        const data  = {categories:State.categories, projects:State.projects, snippets:State.snippets, settings:State.settings, exportDate:now.toISOString()};
+        const json  = JSON.stringify(data, null, 2);
+        const folderId = State.settings.driveFolderId || null;
+        const parents  = folderId ? [folderId] : ['appDataFolder'];
+        const boundary = 'pn_bnd_' + Date.now();
+        const meta  = JSON.stringify({name:fName, parents});
+        const body  = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${json}\r\n--${boundary}--`;
+        try {
+          const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method:'POST', headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'multipart/related; boundary='+boundary}, body
+          });
+          if (!resp.ok) {
+            if (resp.status===401){driveAccessToken=null;this._gdUpdateBar();this._gdUpdateUI(false);alert("Session Drive expirée.");return;}
+            throw new Error((await resp.json())?.error?.message||'HTTP '+resp.status);
+          }
+          State.settings.lastDriveBackup = now.toISOString();
+          State.save();
+          this._gdUpdateBar(now.toISOString());
+          /* Update file count */
+          setTimeout(()=>this._gdUpdateFilesCount(), 1200);
+          alert(`✅ Sauvegarde envoyée sur Drive !\n📄 ${fName}`);
+        } catch(e) { alert("❌ Erreur Drive : " + e.message); }
+        finally { this._gdShowSaving(false); }
+      },
+
+      async _gdUpdateFilesCount() {
+        if (!driveAccessToken) return;
+        const folderId = State.settings.driveFolderId;
+        const q = folderId
+          ? `name+contains+'pronote_backup'+and+'${folderId}'+in+parents+and+trashed%3Dfalse`
+          : `name+contains+'pronote_backup'+and+'appDataFolder'+in+parents`;
+        try {
+          const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&pageSize=100`,{headers:{Authorization:'Bearer '+driveAccessToken}});
+          if (!resp.ok) return;
+          const data = await resp.json();
+          const el = document.getElementById('gd-files-count');
+          if (el) { el.textContent = `📄 ${(data.files||[]).length} sauvegarde(s) sur Drive`; el.classList.remove('hidden'); }
+        } catch(e){}
+      },
+
+      async openRestoreModal() {
+        if (!driveAccessToken) return alert("Connectez-vous d'abord à Google Drive.");
+        const list = document.getElementById('restore-list');
+        list.innerHTML = `<div class="empty-state"><div class="ai-spinner" style="margin:0 auto 10px;"></div>Chargement…</div>`;
+        UI.openModal('modal-drive-restore');
+        const folderId = State.settings.driveFolderId;
+        const q = folderId
+          ? `name+contains+'pronote_backup'+and+'${folderId}'+in+parents+and+trashed%3Dfalse`
+          : `name+contains+'pronote_backup'+and+'appDataFolder'+in+parents`;
+        try {
+          const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,createdTime,size)&orderBy=createdTime+desc&pageSize=30`,{headers:{Authorization:'Bearer '+driveAccessToken}});
+          if (!resp.ok) { if(resp.status===401){driveAccessToken=null;this._gdUpdateUI(false);UI.closeModals();return alert("Session Drive expirée.");}throw new Error('HTTP '+resp.status); }
+          const data  = await resp.json();
+          const files = data.files||[];
+          if (files.length===0) { list.innerHTML=`<div class="empty-state"><span class="empty-state-icon">☁️</span>Aucune sauvegarde Drive trouvée.</div>`; return; }
+          list.innerHTML = '';
+          files.forEach(f => {
+            const d = new Date(f.createdTime);
+            const today = d.toDateString()===new Date().toDateString();
+            const dateStr = today ? d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+            const size    = f.size ? (f.size/1024).toFixed(1)+' Ko' : '';
+            const item    = document.createElement('div');
+            item.className = 'restore-item';
+            item.innerHTML = `<div><div class="restore-item-name">📄 ${f.name.replace('pronote_backup_','').replace('.json','')}</div><div class="restore-item-date">🕐 ${dateStr}${size?' · '+size:''}</div></div><span style="color:var(--primary);font-size:20px;">›</span>`;
+            item.addEventListener('click', ()=>this.restoreFromDrive(f.id, f.name));
+            list.appendChild(item);
+          });
+        } catch(e) { list.innerHTML=`<div style="color:var(--danger);padding:14px;text-align:center;">❌ ${e.message}</div>`; }
+      },
+
+      async restoreFromDrive(fileId, fileName) {
+        if (!confirm(`Restaurer "${fileName}" ?\n\nCela remplacera toutes vos données actuelles.`)) return;
+        try {
+          const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,{headers:{Authorization:'Bearer '+driveAccessToken}});
+          if (!resp.ok) throw new Error('HTTP '+resp.status);
+          const data = await resp.json();
+          if (data.projects && data.categories) {
+            State.categories = data.categories; State.projects = data.projects;
+            if (data.snippets) State.snippets = data.snippets;
+            if (data.settings) State.settings = data.settings;
+            State.save(); UI.closeModals();
+            alert("✅ Sauvegarde restaurée avec succès !"); App.refreshView('view-settings');
+          } else throw new Error("Fichier invalide");
+        } catch(e) { alert("❌ Erreur restauration : "+e.message); }
+      },
+
+      /* ─── DARK MODE ─────────────────────────────────────── */
+      toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('pn_dark_mode', isDark);
+        const btn = document.getElementById('btn-dark-toggle');
+        if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+        document.getElementById('meta-theme-color')?.setAttribute('content', isDark ? '#0a0a15' : '#1e1b4b');
+      },
+
+      /* ─── PWA INSTALL ───────────────────────────────────── */
+      installPwa() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('btn-install').style.display='none'; });
+      },
+
+      /* ─── EXPORT/IMPORT ─────────────────────────── */
+      exportData() {
+        const data = { categories: State.categories, projects: State.projects, snippets: State.snippets, settings: State.settings, exportDate: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url;
+        a.download = `pronote_backup_${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}.json`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+      },
+      importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (data.projects && data.categories) {
+              State.categories = data.categories;
+              State.projects   = data.projects;
+              if (data.snippets) State.snippets = data.snippets;
+              if (data.settings) State.settings = data.settings;
+              State.save();
+              alert("✅ Sauvegarde importée avec succès !");
+              App.refreshView('view-settings');
+            } else alert("❌ Fichier de sauvegarde invalide.");
+          } catch { alert("❌ Erreur lors de la lecture du fichier."); }
+        };
+        reader.readAsText(file);
+        event.target.value = "";
+      },
+
+      /* ═══════════════════════════════════════════
+         IA — REFORMULATION
+      ═══════════════════════════════════════════ */
+      openAiModal(target, originalText) {
+        if (!State.settings.apiKey || !State.settings.apiKey.trim()) {
+          alert("⚠️ Aucune clé API configurée.\nRendez-vous dans Paramètres → Intelligence Artificielle pour ajouter votre clé 1min.AI.\n\nObtenez votre clé sur : app.1min.ai");
+          return;
+        }
+        this.aiTarget = target;
+        document.getElementById('ai-original-box').textContent = originalText;
+        const resultBox = document.getElementById('ai-result-box');
+        resultBox.innerHTML = `<div class="ai-loading"><div class="ai-spinner"></div>Analyse en cours…</div>`;
+        delete resultBox.dataset.result;
+        document.getElementById('btn-ai-accept').disabled = true;
+        UI.openModal('modal-ai');
+        this.callClaudeApi(originalText, target);
+      },
+
+      openAiForCode() {
+        const code = document.getElementById('code-editor').value.trim();
+        if (!code) return alert("L'éditeur de code est vide.");
+        this.openAiModal('code', code);
+      },
+
+      openAiForComment(commentId) {
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        const c = p.comments.find(c => c.id === commentId);
+        if (!c) return;
+        State.currentCommentId = commentId;
+        this.aiTarget = 'edit-comment-direct';
+        this.openAiModal('edit-comment', c.text);
+      },
+
+      async callClaudeApi(text, target) {
+        const isCode = target === 'code';
+        const model  = State.settings.aiModel || "gpt-4o-mini";
+
+        /* On préfixe le prompt avec des instructions système */
+        const systemPrefix = isCode
+          ? "Tu es un expert en développement web. Analyse ce code, corrige les erreurs, améliore la lisibilité. Réponds UNIQUEMENT avec le code amélioré, sans explication ni balises Markdown.\n\nCode à améliorer :\n"
+          : "Tu es un assistant de rédaction professionnel en français. Corrige et reformule le texte ci-dessous de manière claire et concise. Conserve le sens original. Réponds UNIQUEMENT avec le texte corrigé, sans explication.\n\nTexte à corriger :\n";
+
+        const fullPrompt = systemPrefix + text;
+
+        try {
+          const response = await fetch("https://api.1min.ai/api/features", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "API-KEY": State.settings.apiKey
+            },
+            body: JSON.stringify({
+              type: "CHAT_WITH_AI",
+              model: model,
+              promptObject: {
+                prompt: fullPrompt,
+                isMixed: false,
+                webSearch: false
+              }
+            })
+          });
+
+          if (!response.ok) {
+            let errMsg = `Erreur HTTP ${response.status}`;
+            try { const e = await response.json(); errMsg = e.message || e.error || errMsg; } catch {}
+            throw new Error(errMsg);
+          }
+
+          const data = await response.json();
+
+          /* Extraction du texte selon les différents formats de réponse 1min.AI */
+          let result = "";
+          if (data?.aiRecord?.aiRecordDetail?.resultObject?.aiText) {
+            result = data.aiRecord.aiRecordDetail.resultObject.aiText;
+          } else if (data?.aiRecord?.aiRecordDetail?.resultObject) {
+            const ro = data.aiRecord.aiRecordDetail.resultObject;
+            result = typeof ro === "string" ? ro : JSON.stringify(ro);
+          } else if (data?.result) {
+            result = data.result;
+          } else if (data?.message) {
+            result = data.message;
+          } else {
+            result = JSON.stringify(data);
+          }
+
+          const resultBox = document.getElementById('ai-result-box');
+          resultBox.textContent = result;
+          resultBox.dataset.result = result;
+          document.getElementById('btn-ai-accept').disabled = false;
+
+          if (this.aiTarget === 'edit-comment-direct') {
+            resultBox.dataset.target = 'edit-comment-direct';
+          }
+        } catch (err) {
+          const resultBox = document.getElementById('ai-result-box');
+          resultBox.innerHTML = `<span style="color:var(--danger);">❌ Erreur 1min.AI : ${err.message}</span>`;
+        }
+      }
+    };
+
+    /* Override btn-ai-accept for direct comment update */
+    document.getElementById('btn-ai-accept').addEventListener('click', function() {
+      const resultBox = document.getElementById('ai-result-box');
+      const result    = resultBox.dataset.result;
+      if (!result) return;
+
+      if (App.aiTarget === 'note') {
+        document.getElementById('input-new-comment').value = result;
+      } else if (App.aiTarget === 'code') {
+        document.getElementById('code-editor').value = result;
+        document.getElementById('preview-frame').classList.toggle('hidden', result.trim() === "");
+      } else if (App.aiTarget === 'edit-comment') {
+        document.getElementById('input-edit-comment').value = result;
+      } else if (App.aiTarget === 'edit-comment-direct') {
+        const p = State.projects.find(p => p.id === State.currentProjectId);
+        const c = p?.comments.find(c => c.id === State.currentCommentId);
+        if (c) { c.text = result; State.save(); App.renderComments(); }
+      }
+      UI.closeModals();
+    }, { capture: true }); // capture pour passer avant les autres listeners
+
+    /* Shake animation */
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%,100%{transform:translateX(0)}
+        20%,60%{transform:translateX(-6px)}
+        40%,80%{transform:translateX(6px)}
+      }
+    `;
+    document.head.appendChild(style);
+
+    App.init();
+  </script>
+</body>
+</html>
